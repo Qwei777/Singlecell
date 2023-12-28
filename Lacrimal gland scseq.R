@@ -1,10 +1,108 @@
+if(!require(multtest))install.packages("multtest")
+## Loading required package: multtest
+## Warning: package 'multtest' was built under R version 4.0.3
+## Loading required package: BiocGenerics
+## Warning: package 'BiocGenerics' was built under R version 4.0.5
+## Loading required package: parallel
+## 
+## Attaching package: 'BiocGenerics'
+## The following objects are masked from 'package:parallel':
+## 
+##     clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+##     clusterExport, clusterMap, parApply, parCapply, parLapply,
+##     parLapplyLB, parRapply, parSapply, parSapplyLB
+## The following object is masked from 'package:imager':
+## 
+##     width
+## The following objects are masked from 'package:stats':
+## 
+##     IQR, mad, sd, var, xtabs
+## The following objects are masked from 'package:base':
+## 
+##     anyDuplicated, append, as.data.frame, basename, cbind, colnames,
+##     dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+##     grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
+##     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+##     rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
+##     union, unique, unsplit, which.max, which.min
+## Loading required package: Biobase
+## Warning: package 'Biobase' was built under R version 4.0.3
+## Welcome to Bioconductor
+## 
+##     Vignettes contain introductory material; view with
+##     'browseVignettes()'. To cite Bioconductor, see
+##     'citation("Biobase")', and for packages 'citation("pkgname")'.
+## 
+## Attaching package: 'Biobase'
+## The following object is masked from 'package:imager':
+## 
+##     channel
+if(!require(Seurat))install.packages("Seurat")
+## Loading required package: Seurat
+## Warning: package 'Seurat' was built under R version 4.0.5
+## Registered S3 method overwritten by 'spatstat.geom':
+##   method      from  
+##   plot.imlist imager
+## Attaching SeuratObject
+if(!require(dplyr))install.packages("dplyr")
+## Loading required package: dplyr
+## Warning: package 'dplyr' was built under R version 4.0.5
+## 
+## Attaching package: 'dplyr'
+## The following object is masked from 'package:Biobase':
+## 
+##     combine
+## The following objects are masked from 'package:BiocGenerics':
+## 
+##     combine, intersect, setdiff, union
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+if(!require(patchwork))install.packages("patchwork")
+## Loading required package: patchwork
+## Warning: package 'patchwork' was built under R version 4.0.5
+if(!require(R.utils))install.packages("R.utils")
+## Loading required package: R.utils
+## Warning: package 'R.utils' was built under R version 4.0.5
+## Loading required package: R.oo
+## Warning: package 'R.oo' was built under R version 4.0.3
+## Loading required package: R.methodsS3
+## Warning: package 'R.methodsS3' was built under R version 4.0.3
+## R.methodsS3 v1.8.1 (2020-08-26 16:20:06 UTC) successfully loaded. See ?R.methodsS3 for help.
+## R.oo v1.24.0 (2020-08-26 16:11:58 UTC) successfully loaded. See ?R.oo for help.
+## 
+## Attaching package: 'R.oo'
+## The following object is masked from 'package:R.methodsS3':
+## 
+##     throw
+## The following object is masked from 'package:magrittr':
+## 
+##     equals
+## The following objects are masked from 'package:methods':
+## 
+##     getClasses, getMethods
+## The following objects are masked from 'package:base':
+## 
+##     attach, detach, load, save
+## R.utils v2.11.0 (2021-09-26 08:30:02 UTC) successfully loaded. See ?R.utils for help.
+## 
+## Attaching package: 'R.utils'
+## The following object is masked from 'package:magrittr':
+## 
+##     extract
+## The following object is masked from 'package:utils':
+## 
+##     timestamp
+## The following objects are masked from 'package:base':
+## 
+##     cat, commandArgs, getOption, inherits, isOpen, nullfile, parse,
+##     warnings
 rm(list = ls())
 
-install.packages('Seurat')
-install.packages('dplyr')
-update.packages('dplyr')
-install.packages("mindr")
-install.packages("tidyverse")
+
 library(Seurat)
 library(dplyr)
 library(tidyr)
@@ -19,26 +117,38 @@ eye
 
 ncol(eye)
 eye[["percent.mt"]] <- PercentageFeatureSet(eye, pattern = "^mt-")
+#人源的需要换成MT
 head(eye@meta.data,5)
 VlnPlot(eye, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3) 
 plot1 <- FeatureScatter(eye, feature1 = "nCount_RNA", feature2 = "percent.mt")
 plot2 <- FeatureScatter(eye, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
 CombinePlots(plots = list(plot1, plot2)) 
+## Warning: CombinePlots is being deprecated. Plots should now be combined using
+## the patchwork system.
 plot2
 eye<- subset(eye, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)   
 VlnPlot(eye, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3) 
-##ncol(as.data.frame(eye[["RNA"]]@counts))用上一步方法检测即可，总是报错
+##ncol(as.data.frame(eye[["RNA"]]@counts))
 memory.size()
 ##计算 分群
 eye <- NormalizeData(eye, normalization.method = "LogNormalize", scale.factor = 10000)
-eye <- FindVariableFeatures(eye, selection.method = "vst", nfeatures = 2000)
+#CLR、RC
+#normalizes the feature expression measurements for each cell by the total expression
+#eye[["RNA"]]@data
+eye <- FindVariableFeatures(eye, selection.method = "vst", nfeatures = 2500)
+#for PCA DoHeatmap
 top10 <- head(VariableFeatures(eye), 10)
 plot1 <- VariableFeaturePlot(eye)
 plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
-plot1
-plot2
-###eye <- ScaleData(eye, features = rownames(eye))
-eye <- ScaleData(eye)
+## When using repel, set xnudge and ynudge to 0 for optimal results
+plot1 + plot2
+# plot variable features with and without labels
+## Warning: Transformation introduced infinite values in continuous x-axis
+## Warning: Removed 1 rows containing missing values (geom_point).
+## Warning: Transformation introduced infinite values in continuous x-axis
+## Warning: Removed 1 rows containing missing values (geom_point).
+eye <- ScaleData(eye, features = rownames(eye))
+##eye <- ScaleData(eye)
 eye <- RunPCA(eye, features = VariableFeatures(object = eye))
 print(eye[["pca"]], dims = 1:5, nfeatures = 5)
 VizDimLoadings(eye, dims = 1:2, reduction = "pca")
@@ -78,5 +188,4 @@ eye<- readRDS('eye.rds')
 ##png(filename="p.png",width=1200,height=900,res=300)
 ##print(p)
 ##dev.off()
-##三个文件eye,eye.markers,top10
 #http://biocc.hrbmu.edu.cn/CellMarker/
