@@ -175,11 +175,11 @@ top10 <- eyemarkers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_log2FC)
 
 DoHeatmap(eye, features = top10$gene) + NoLegend()
 
-write.table(eye.markers,  # 要导出的数据
-            file = "mtcars.txt", # 指定导出数据的文件名称和格式
-            sep = "\t", # 字段分隔符
-            row.names = TRUE, # 逻辑词，是否将行名一起导出
-            col.names = NA) # 逻辑词，是否将列名一起导出
+write.table(eye.markers,  
+            file = "mtcars.txt",
+            sep = "\t",
+            row.names = TRUE,
+            col.names = NA)
 
 
 
